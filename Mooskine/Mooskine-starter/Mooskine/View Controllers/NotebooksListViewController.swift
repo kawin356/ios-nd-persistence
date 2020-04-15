@@ -18,7 +18,9 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
     
     var fetchResultController:NSFetchedResultsController<Notebook>!
     
+    
 
+  
     
     fileprivate func setupFetchResultController() {
         let fetchRequest: NSFetchRequest<Notebook> = Notebook.fetchRequest()
@@ -26,6 +28,9 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
         fetchRequest.sortDescriptors = [sortDescriptor]
         
         fetchResultController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: dataController.viewContext, sectionNameKeyPath: nil, cacheName: "notebooks")
+        
+        let resultController = ListDataSource(tableView: tableView)
+        
         fetchResultController.delegate = self
         do {
             try fetchResultController.performFetch()
@@ -40,7 +45,8 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
         navigationItem.rightBarButtonItem = editButtonItem
         
         setupFetchResultController()
-
+        
+        
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -173,15 +179,15 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
 
 
 extension NotebooksListViewController:NSFetchedResultsControllerDelegate {
-    
+
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         tableView.beginUpdates()
     }
-    
+
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         tableView.endUpdates()
     }
-    
+
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         switch type {
         case .insert:
@@ -196,7 +202,7 @@ extension NotebooksListViewController:NSFetchedResultsControllerDelegate {
             fatalError("Error")
         }
     }
-    
+
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int, for type: NSFetchedResultsChangeType) {
         let indexSet = IndexSet(integer: sectionIndex)
         switch type {

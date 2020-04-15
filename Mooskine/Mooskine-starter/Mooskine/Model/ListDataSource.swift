@@ -9,35 +9,33 @@
 import UIKit
 import CoreData
 
-class ListDataSource<ObjectType: NSManagedObject, CellType: UITableViewCell>: NSObject, NSFetchedResultsControllerDelegate, UITableViewDataSource {
+class ListDataSource<ObjectType: NSManagedObject, CellType: UITableViewCell>: NSObject, NSFetchedResultsControllerDelegate {
     
     let tableView: UITableView
-    
-    var fetchRequest:NSFetchRequest<ObjectType>!
-    
-    var managedObjectContext: NSManagedObjectContext
-    
+            
     var fetchResultController:NSFetchedResultsController<ObjectType>!
-    
+
     var configure: (CellType, ObjectType) -> Void
 
-    
-    init(tableView: UITableView, managedObjectContext: NSManagedObjectContext, fetchRequest: NSFetchRequest<ObjectType>, configure: @escaping (CellType, ObjectType) -> Void) {
+    var reuseCell: String
+
+
+    init(tableView: UITableView, managedObjectContext: NSManagedObjectContext, fetchRequest: NSFetchRequest<ObjectType>, reuseCell: String, configure: @escaping (CellType, ObjectType) -> Void) {
         self.tableView = tableView
-        self.managedObjectContext = managedObjectContext
         self.configure = configure
-        self.fetchRequest = fetchRequest
+        self.reuseCell = reuseCell
         fetchResultController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: managedObjectContext, sectionNameKeyPath: nil, cacheName: nil)
+        try? fetchResultController.performFetch()
     }
-    
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return fetchResultController.sections?.count ?? 1
+        return fetchResultController.sections?[section].numberOfObjects ?? 0
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let aCell = fetchResultController.object(at: indexPath)
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! CellType
-        configure(cell,aCell)
+        let cell = tableView.dequeueReusableCell(withIdentifier: reuseCell, for: indexPath)
+        configure(cell as! CellType ,aCell)
         return cell
     }
     
