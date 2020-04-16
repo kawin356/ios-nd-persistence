@@ -9,23 +9,29 @@
 import UIKit
 import CoreData
 
-class ListDataSource<ObjectType: NSManagedObject, CellType: UITableViewCell>: NSObject, NSFetchedResultsControllerDelegate {
+class ListDataSource<ObjectType: NSManagedObject, CellType: UITableViewCell>: NSObject, NSFetchedResultsControllerDelegate, UITableViewDataSource {
     
     let tableView: UITableView
             
     var fetchResultController:NSFetchedResultsController<ObjectType>!
 
-    var configure: (CellType, ObjectType) -> Void
+    var configure: ( ObjectType, UITableViewCell) -> Void
 
-    var reuseCell: String
+    var managedObjectContext: NSManagedObjectContext
 
-
-    init(tableView: UITableView, managedObjectContext: NSManagedObjectContext, fetchRequest: NSFetchRequest<ObjectType>, reuseCell: String, configure: @escaping (CellType, ObjectType) -> Void) {
+    init(tableView: UITableView, managedObjectContext: NSManagedObjectContext, fetchRequest: NSFetchRequest<ObjectType>, configure: @escaping (ObjectType, Any) -> Void) {
         self.tableView = tableView
         self.configure = configure
-        self.reuseCell = reuseCell
         fetchResultController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: managedObjectContext, sectionNameKeyPath: nil, cacheName: nil)
+        self.managedObjectContext = managedObjectContext
+        super.init()
+        fetchResultController.delegate = self
         try? fetchResultController.performFetch()
+        
+    }
+
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return fetchResultController.sections?.count ?? 1
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -34,8 +40,9 @@ class ListDataSource<ObjectType: NSManagedObject, CellType: UITableViewCell>: NS
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let aCell = fetchResultController.object(at: indexPath)
-        let cell = tableView.dequeueReusableCell(withIdentifier: reuseCell, for: indexPath)
-        configure(cell as! CellType ,aCell)
+        
+        let cell = tableView.dequeueReusableCell(withIdentifier: NotebookCell.defaultReuseIdentifier, for: indexPath) as! NotebookCell
+        configure(aCell, cell)
         return cell
     }
     
@@ -76,3 +83,4 @@ class ListDataSource<ObjectType: NSManagedObject, CellType: UITableViewCell>: NS
         }
     }
 }
+

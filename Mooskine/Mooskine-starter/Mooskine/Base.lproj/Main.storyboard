@@ -80,7 +80,6 @@
                                     </tableViewCell>
                                 </prototypes>
                                 <connections>
-                                    <outlet property="dataSource" destination="4sO-ya-amD" id="opN-vz-Xnm"/>
                                     <outlet property="delegate" destination="4sO-ya-amD" id="RbN-r0-fo4"/>
                                 </connections>
                             </tableView>
